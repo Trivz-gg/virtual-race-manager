@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Race Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 8px; }
+        #strategy { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Virtual Race Manager</h1>
+        <label>Track:</label>
+        <input type="text" id="track">
+        
+        <label>Car Model:</label>
+        <input type="text" id="car">
+        
+        <label>Tyre Compounds (comma-separated):</label>
+        <input type="text" id="tyres" placeholder="Soft, Medium, Hard">
+        
+        <label>Average Lap Time per Tyre (comma-separated in seconds):</label>
+        <input type="text" id="lapTimes" placeholder="90, 92, 95">
+        
+        <label>Tyre Lifespan per Compound (comma-separated in laps):</label>
+        <input type="text" id="tyreLifespan" placeholder="12, 18, 25">
+        
+        <label>Fuel Lifespan (laps per tank):</label>
+        <input type="number" id="fuelLifespan">
+        
+        <label>Total Race Duration (laps or minutes):</label>
+        <input type="text" id="raceDuration" placeholder="Enter laps or time (e.g., 60 laps or 90 min)">
+        
+        <label>Mandatory Tyre Compound (if any):</label>
+        <input type="text" id="mandatoryTyre" placeholder="Optional">
+        
+        <label><input type="checkbox" id="variableWeather" onchange="toggleWeatherInputs()"> Variable Weather (Wet Conditions)</label>
+        
+        <div id="weatherInputs" style="display: none;">
+            <label>Rain Start Lap:</label>
+            <input type="number" id="rainStartLap" placeholder="Enter lap number">
+            
+            <label>Rain End Lap:</label>
+            <input type="number" id="rainEndLap" placeholder="Enter lap number">
+        </div>
+        
+        <button onclick="generateStrategy()">Generate Strategy</button>
+        
+        <div id="strategy"></div>
+    </div>
+
+    <script>
+        function toggleWeatherInputs() {
+            let weatherInputs = document.getElementById("weatherInputs");
+            weatherInputs.style.display = document.getElementById("variableWeather").checked ? "block" : "none";
+        }
+
+        function generateStrategy() {
+            let tyres = document.getElementById("tyres").value.split(",").map(t => t.trim());
+            let lapTimes = document.getElementById("lapTimes").value.split(",").map(t => parseFloat(t.trim()));
+            let tyreLifespan = document.getElementById("tyreLifespan").value.split(",").map(t => parseInt(t.trim()));
+            let fuelLifespan = parseInt(document.getElementById("fuelLifespan").value);
+            let raceDuration = document.getElementById("raceDuration").value.trim();
+            let mandatoryTyre = document.getElementById("mandatoryTyre").value.trim();
+            let isVariableWeather = document.getElementById("variableWeather").checked;
+            let rainStartLap = parseInt(document.getElementById("rainStartLap").value) || 0;
+            let rainEndLap = parseInt(document.getElementById("rainEndLap").value) || 0;
+            
+            let raceLaps;
+            if (raceDuration.includes("laps")) {
+                raceLaps = parseInt(raceDuration);
+            } else {
+                let avgLapTime = Math.min(...lapTimes);
+                let totalTime = parseInt(raceDuration);
+                raceLaps = Math.floor((totalTime * 60) / avgLapTime);
+            }
+            
+            let bestTyreIndex = lapTimes.indexOf(Math.min(...lapTimes));
+            let bestTyre = tyres[bestTyreIndex];
+            let pitStops = Math.ceil(raceLaps / tyreLifespan[bestTyreIndex]);
+            let fuelStops = Math.ceil(raceLaps / fuelLifespan);
+            let totalStops = Math.max(pitStops, fuelStops);
+            
+            let strategy = `Start on ${bestTyre} tyres for the best lap times.\n`;
+            strategy += `Pit approximately every ${tyreLifespan[bestTyreIndex]} laps for new tyres.\n`;
+            strategy += `Refuel every ${fuelLifespan} laps.\n`;
+            strategy += `Estimated total pit stops: ${totalStops}.\n`;
+            
+            if (mandatoryTyre) {
+                strategy += `Ensure you use ${mandatoryTyre} for at least 1 lap.\n`;
+            }
+            
+            if (isVariableWeather) {
+                strategy += `Weather is variable. Rain is expected between laps ${rainStartLap} and ${rainEndLap}.\n`;
+                strategy += `Switch to Intermediates or Heavy Wets as rain begins and back to dry tyres once the track dries.\n`;
+                strategy += `Monitor track conditions carefully and adapt the strategy accordingly.\n`;
+            }
+            
+            strategy += `\nTrack-specific optimizations may further improve performance. Consider adjusting your approach based on past experience.\n`;
+            strategy += `\nThis strategy is a recommendation based on provided inputs, but race conditions may vary.\n`;
+            strategy += `Always adapt your strategy to track conditions and driving style. Good luck!`;
+            
+            document.getElementById("strategy").innerText = strategy;
+        }
+    </script>
+</body>
+</html>
