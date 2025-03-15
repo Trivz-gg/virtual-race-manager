@@ -60,12 +60,12 @@
         }
 
         function generateStrategy() {
-            let tyres = document.getElementById("tyres").value.split(",").map(t => t.trim());
+            let tyres = document.getElementById("tyres").value.toLowerCase().split(",").map(t => t.trim());
             let lapTimes = document.getElementById("lapTimes").value.split(",").map(t => parseFloat(t.trim()));
             let tyreLifespan = document.getElementById("tyreLifespan").value.split(",").map(t => parseInt(t.trim()));
             let fuelLifespan = parseInt(document.getElementById("fuelLifespan").value);
-            let raceDuration = document.getElementById("raceDuration").value.trim();
-            let mandatoryTyre = document.getElementById("mandatoryTyre").value.trim();
+            let raceDuration = document.getElementById("raceDuration").value.trim().toLowerCase();
+            let mandatoryTyre = document.getElementById("mandatoryTyre").value.trim().toLowerCase();
             let isVariableWeather = document.getElementById("variableWeather").checked;
             let rainStartLap = parseInt(document.getElementById("rainStartLap").value) || 0;
             let rainEndLap = parseInt(document.getElementById("rainEndLap").value) || 0;
